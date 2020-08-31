@@ -1,0 +1,789 @@
+﻿var maxFileSize = 5242880;
+var reqCounter = 0;
+var nullValue = "[null]";
+var spinnerTimeout = new Object();
+var clientID = "";
+var lastRequests = "";
+var connectionType = "default";
+
+function addClass(e, className) {
+	if (element(e).className.length === 0) element(e).className = className; else element(e).className += " " + className;
+}
+
+function appendParams(params, newParam1, newParam2) {
+	var returnParams = "";
+
+	if (newParam1 && newParam1.length > 0) {
+		if (params && params.length > 0) returnParams = params + "&" + newParam1; else returnParams = newParam1;
+		if (newParam2 && newParam2.length > 0) returnParams = returnParams + "&" + newParam2;
+	} else if (newParam2 && newParam2.length > 0) {
+		if (params && params.length > 0) returnParams = params + "&" + newParam2; else returnParams = newParam2;
+	} else if (params && params.length > 0) {
+		returnParams = params;
+	}
+
+	return returnParams;
+}
+
+function cancelBubble(e) {
+	var evt = e ? e : window.event;
+	if (evt.stopPropagation) evt.stopPropagation();
+	if (evt.cancelBubble !== null) evt.cancelBubble = true;
+}
+
+function cleanParams(params) {
+	if (!params || params.length === 0) return "";
+	params = params.replace(/\?/g, "");
+	return "&" + params;
+}
+
+function clearRequest(componentName, params) {
+	var clean = cleanParams(params);
+	var requestID = componentName + "_" + clean;
+	sessionStorage.removeItem(requestID);
+}
+
+function componentRequest(method, componentName, params, contentDiv, fillContentDiv, callback, formValues, ignoreTimeout, server) {
+	var clean = cleanParams(params);
+	var url = "/Ajax.aspx?component=" + componentName
+	if (server) url = "https://" + server + url;
+	if (contentDiv) contentDiv = element(contentDiv);
+	if (contentDiv && fillContentDiv) url += "&ajaxDiv=" + contentDiv.id;
+	url += clean;
+
+	var sessionkey = sessionStorage.getItem("sessionkey");
+	if (sessionkey && sessionkey.length > 0) url += "&skey=" + sessionkey;
+
+	url += "&ts=" + (new Date()).getTime();
+
+	var xmlhttp = getHttpRequestObject();
+	xmlhttp.open(method, url, true);
+
+	xmlhttp.request_details = deviceType() + ":" + connectionType + ":" + componentName + ":" + encodeURIComponent(params);
+
+	reqCounter++;
+	xmlhttp.requestNumber = reqCounter.toString();
+
+	var isPost = (method.toLowerCase() === "post");
+	if (isPost && !formValues) formValues = getDivFormValues(contentDiv, true);
+
+	var result = { status: 0, code: 0 };
+
+	//handle reply
+	xmlhttp.onreadystatechange = function () {
+		if (xmlhttp.readyState === 4) {
+			var tHandle = spinnerTimeout[xmlhttp.requestNumber];
+			if (tHandle) {
+				clearTimeout(tHandle);
+				delete tHandle;
+				if ($.isFunction(window.handleAjaxWait)) handleAjaxWait(false, xmlhttp.requestNumber);
+			}
+		}
+
+		if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+			if (clientID.length === 0) {
+				clientID = xmlhttp.getResponseHeader("AjaxClientID");
+			}
+
+			var skey = xmlhttp.getResponseHeader("AjaxSessionKey");
+			if (skey && skey.length > 0) {
+				sessionStorage.setItem("sessionkey", skey);
+			}
+
+			var err = xmlhttp.getResponseHeader("AjaxServerError");
+			if (err && err.length > 0) {
+				myAlert(err, reloadPage);
+				return;
+			}
+
+			var redir = xmlhttp.getResponseHeader("AjaxRedirect");
+			if (redir && redir.length > 0) {
+				redirectFade(redir);
+				return;
+			}
+
+			var newWin = xmlhttp.getResponseHeader("AjaxNewWindow");
+			if (newWin && newWin.length > 0) {
+				window.open(newWin);
+				return;
+			}
+
+			var alertMsg = xmlhttp.getResponseHeader("AjaxAlertMessage");
+			if (alertMsg && alertMsg.length > 0) {
+				myAlert(alertMsg);
+			}
+
+			var returns = xmlhttp.getResponseHeader("AjaxReturnValues");
+			if (returns && returns.length > 0) {
+				var vals = returns.split("|");
+				for (var i = 0; i < vals.length; i++) {
+					var namevalue = vals[i].split("=");
+					var testInt = filterInt(namevalue[1]);
+
+					if (isNaN(testInt))
+						result[namevalue[0]] = namevalue[1];
+					else
+						result[namevalue[0]] = testInt;
+				}
+			}
+
+			var code = xmlhttp.getResponseHeader("AjaxReturnCode");
+
+			if (code) {
+				var killed = xmlhttp.getResponseHeader("AjaxKill");
+
+				if (!killed || killed !== "1") {
+					var rt = xmlhttp.responseText;
+
+					if (rt && rt.length > 0) {
+						
+						var time = (new Date()).getTime() - xmlhttp.startTime.getTime();
+						console.log("Time: " + time.toString() + " - Size: " + rt.length.toString());
+
+						lastRequests += (time.toString() + "," + xmlhttp.request_details +  "|");
+
+						result.updated = false;
+						var requestID = componentName + "_" + clean;
+						var lastKey = sessionStorage.getItem(requestID);
+						if (lastKey && lastKey !== rt.length.toString()) result.updated = true;
+						sessionStorage.setItem(requestID, rt.length.toString());
+
+						if (contentDiv && fillContentDiv) {
+
+							var scrollcb = xmlhttp.getResponseHeader("AjaxScrollCallback");
+
+							window.requestAnimationFrame(function () {
+								contentDiv.innerHTML = rt;
+								
+								if (scrollcb && scrollcb.length > 0) eval(scrollcb);
+
+								setInputFocus(contentDiv);
+							});
+							
+
+							//div = document.createElement('div');
+							//div.innerHTML = rt;
+
+							//contentDiv.innerHTML = "";
+							//contentDiv.appendChild(div);
+
+							//var scrollcb = xmlhttp.getResponseHeader("AjaxScrollCallback");
+							//if (scrollcb && scrollcb.length > 0) {
+							//	var temp = scrollcb.split(",");
+							//	var subdiv = $(contentDiv).find("#" + temp[0]);
+
+							//	if (subdiv) {
+							//		if (temp[1].length > 0) {
+							//			subdiv.scrollTop = parseInt(temp[1]);
+							//		} else {
+										
+							//		}
+							//	}
+							//}							
+
+							//if ($.isFunction(window.componentRequestDone)) componentRequestDone(contentDiv);
+						}
+						else result.data = rt;
+
+						result.status = 1;
+					}
+				}
+
+				result.code = parseInt(code);
+			}
+
+			var cb = xmlhttp.getResponseHeader("AjaxCallback");
+
+			if (cb && cb.length > 0 && callback) {
+				window.requestAnimationFrame(function () { callback(result); eval(cb) });
+			} else if (cb && cb.length > 0) {
+				window.requestAnimationFrame(function () { eval(cb) });
+			} else if (callback) {
+				window.requestAnimationFrame(function () { callback(result) });
+			}
+		}
+	}
+	//end handle reply
+
+	if (ignoreTimeout) xmlhttp.timeout = 30000; else xmlhttp.timeout = 10000;
+
+	xmlhttp.ontimeout = function () {
+		if ($.isFunction(window.handleAjaxTimeout))
+			handleAjaxTimeout();
+		else {
+			myAlert("The server request failed. Please try again.", function () {
+				if (callback) callback(result);
+			});
+		}
+	}
+
+	if (!ignoreTimeout) {
+		spinnerTimeout[xmlhttp.requestNumber] = setTimeout(function () {
+			if ($.isFunction(window.handleAjaxWait)) handleAjaxWait(true, xmlhttp.requestNumber);
+		}, 1000);
+	}
+
+	xmlhttp.setRequestHeader("AjaxRequestIndex", xmlhttp.requestNumber);
+	xmlhttp.setRequestHeader("AjaxClientID", clientID);
+	xmlhttp.setRequestHeader("AjaxRequests", lastRequests);
+	xmlhttp.setRequestHeader("ScreenWidth", window.screen.width);
+	xmlhttp.setRequestHeader("ScreenHeight", window.screen.height);
+	xmlhttp.setRequestHeader("BrowserWidth", $(window).width());
+	xmlhttp.setRequestHeader("BrowserHeight", $(window).height());
+	if (server) xmlhttp.setRequestHeader("AjaxServer", server);
+
+	lastRequests = "";
+
+	xmlhttp.startTime = new Date();
+
+	if (isPost)
+		xmlhttp.send(formValues);
+	else
+		xmlhttp.send(null);
+}
+
+function delayHide(id, ms) {
+	setTimeout(function () {
+		hide(id);
+	}, ms);
+}
+
+function deviceType() {
+	var ua = navigator.userAgent.toLowerCase();
+
+	if (ua.indexOf("ipad") >= 0)
+		return "ipad";
+	else if (ua.indexOf("iphone") >= 0)
+		return "iphone";
+	else if (ua.indexOf("android") >= 0)
+		return "android";
+	else
+		return "other";
+}
+
+function element(e) {
+	if (e) {
+		if (typeof e == "object")
+			return e;
+		else
+			return document.getElementById(e);
+	} else return null;
+}
+
+function enterKeyPressed(event) {
+	if (getKeyCode(event) == 13 && !event.shiftKey) return true; else return false;
+}
+
+function extractDivContents(data, divID) {
+	var div = document.createElement("div");
+	div.innerHTML = data;
+	var d = findById(div, divID);
+	if (d) return d.innerHTML; else return "";
+}
+
+function fade(fadeIn) {
+	if (fadeIn) {
+		$("body").animate({ "opacity": "1.0" }, 200);
+	} else {
+		$("body").animate({ "opacity": "0" }, 200);
+	}
+}
+
+function filterInt(value) {
+	if (/^[-+]?(\d+|Infinity)$/.test(value)) {
+		return Number(value)
+	} else {
+		return NaN
+	}
+}
+
+function findById(div, id) {
+	for (var i = 0; i < div.childNodes.length; i++) {
+		if (div.childNodes[i].id === id)
+			return div.childNodes[i];
+		else if (div.childNodes[i].hasChildNodes) {
+			var n = findById(div.childNodes[i], id);
+
+			if (n) return n;
+		}
+	}
+
+	return null;
+}
+
+function findParentWithClass(elem, className) {
+	className = " " + className.toLowerCase() + " ";
+
+	var p = element(elem);
+
+	while (p) {
+		if (p.className && p.className.length > 0 && (" " + p.className.toLowerCase() + " ").indexOf(className) >= 0) return p;
+		p = p.parentNode;
+	}
+
+	return null;
+}
+
+function getComponent(componentName, params, contentDiv, fillContentDiv, callback, ignoreTimeout, server) {
+	componentRequest("GET", componentName, params, contentDiv, fillContentDiv, callback, null, ignoreTimeout, server);
+}
+
+function getDivFormInput(contentDiv, inputID) {
+	contentDiv = element(contentDiv);
+
+	var inputs = contentDiv.getElementsByTagName("input");
+	for (i = 0; i < inputs.length; i++) {
+		if (inputs[i].id && inputs[i].id === inputID) return inputs[i];
+	}
+
+	var tas = contentDiv.getElementsByTagName("textarea");
+	for (i = 0; i < tas.length; i++) {
+		if (tas[i].id && tas[i].id === inputID) return tas[i];
+	}
+
+	var selects = contentDiv.getElementsByTagName("select");
+	for (i = 0; i < selects.length; i++) {
+		if (selects[i].id && selects[i].id === inputID) return selects[i];
+	}
+
+	return null;
+}
+
+function getDivFormValues(contentDiv, useFormData, id) {
+	if (useFormData) var formData = new FormData();
+	var vals = "";
+	var i = 0;
+
+	if (contentDiv) {
+		contentDiv = element(contentDiv);
+
+		var inputs = contentDiv.getElementsByTagName("input");
+		for (i = 0; i < inputs.length; i++) {
+			if (inputs[i].id) {
+				var v = "";
+				var t = inputs[i].type.toLowerCase();
+
+				if (t === "checkbox") {
+					if (inputs[i].checked) { v = "1" } else { v = "0" }
+				} else if (t === "radio") {
+					if (inputs[i].checked) { v = inputs[i].value } else { continue }
+				} else if (t === "file") {
+					for (var k = 0; k < inputs[i].files.length; k++) {
+						if (inputs[i].files[k].size > maxFileSize) {
+							myAlert("File '" + inputs[i].files[k].name + "' is too large. Maximum file size is " + (maxFileSize / 1048576).toString() + " megabytes.");
+						} else {
+							formData.append(inputs[i].files[k].name, inputs[i].files[k], inputs[i].files[k].name);
+						}
+					}
+				} else {
+					if (inputs[i].name.indexOf("rememberscroll_") >= 0) {
+						v = element(inputs[i].name.substr(15)).scrollTop;
+					} else if (useFormData) {
+						v = inputs[i].value;
+					} else {
+						v = encodeURIComponent(inputs[i].value);
+					}
+				}
+
+				if (v !== nullValue) {
+					if (useFormData) {
+						formData.append(inputs[i].name, v);
+					} else {
+						vals += (inputs[i].name + "=" + v + "&");
+					}
+				}
+			}
+		}
+
+		var tas = contentDiv.getElementsByTagName("textarea");
+		for (i = 0; i < tas.length; i++) {
+			if (tas[i].id) {
+				if (useFormData) {
+					formData.append(tas[i].name, tas[i].value);
+				} else {
+					vals += (tas[i].name + "=" + encodeURIComponent(tas[i].value) + "&");
+				}
+			}
+		}
+
+		var selects = contentDiv.getElementsByTagName("select");
+		for (i = 0; i < selects.length; i++) {
+			if (selects[i].id) {
+				if (useFormData) {
+					formData.append(selects[i].name, selects[i].value);
+				} else {
+					vals += (selects[i].name + "=" + selects[i].value + "&");
+				}
+			}
+		}
+	}
+
+	if (useFormData) {
+		formData.append("__VIEWSTATE", "");
+
+		return formData;
+	} else {
+		vals += "__VIEWSTATE=";
+
+		return vals;
+	}
+}
+
+function getHttpRequestObject() {
+	if (window.XMLHttpRequest) {
+		return new XMLHttpRequest();
+	} else if (window.ActiveXObject) {
+		return new ActiveXObject('Microsoft.XMLHttp');
+	} else {
+		myAlert('This browser is not supported.');
+		return null;
+	}
+}
+
+function getKeyCode(event) {
+	var keyCode = ("which" in event) ? event.which : event.keyCode;
+	return keyCode;
+}
+
+function getWebPage(url, callback) {
+	url += "&ts=" + (new Date()).getTime();
+	var xmlhttp = getHttpRequestObject();
+	xmlhttp.open("POST", url, true);
+
+	xmlhttp.onreadystatechange = function () {
+		if (xmlhttp.readyState == 4) {
+			if (callback) { callback(xmlhttp.responseText); }
+		}
+	}
+
+	xmlhttp.send(null);
+}
+
+function hasClass(e, className) {
+	var classes = element(e).className.split(" ");
+
+	for (var i = 0; i < classes.length; i++) {
+		if (classes[i] === className) return true;
+	}
+
+	return false;
+}
+
+function hide(e) {
+	var elem = element(e);
+	if (elem && elem.style.display !== "none") elem.style.display = "none";
+}
+
+function isHidden(e) {
+	return (!element(e).style.display || element(e).style.display === "none");
+}
+
+function myAlert(msg, callback) {
+	if ($.isFunction(window.showAlert)) showAlert(msg, callback); else alert(msg);
+}
+
+function ntes(val) {
+	if (val && val.length > 0) return val; else return "";
+}
+
+function postAjax(elem, callback, showClickedEffect, params, ignoreTimeout) {
+	elem = element(elem);
+
+	var paramsAll = params;
+
+	if ($.isFunction(window.prePostAjax)) paramsAll = appendParams(paramsAll, prePostAjax(elem));
+
+	paramsAll = appendParams(paramsAll, elem.id + "=1");
+
+	var p = elem;
+
+	while (p) {
+		var c = p.getAttribute("ajaxcomponent");
+
+		if (c) {
+			var d = p.getAttribute("ajaxdiv");
+
+			paramsAll = appendParams(paramsAll, "ajaxRequestID=" + p.getAttribute("ajaxrequestid"));
+
+			if (showClickedEffect) showClicked(elem);
+
+			var s = p.getAttribute("ajaxserver");
+
+			if (callback)
+				postComponent(c, paramsAll, d, true, callback(d), ignoreTimeout, s);
+			else
+				postComponent(c, paramsAll, d, true, null, ignoreTimeout, s);
+
+			return;
+		}
+
+		p = p.parentElement;
+	}
+}
+
+function postAjaxValidate(elem, callback, params, ignoreTimeout) {
+	params = appendParams(params, "ajax_validate=1");
+	postAjax(elem, callback, true, params, ignoreTimeout);
+}
+
+function postComponent(componentName, params, contentDiv, fillContentDiv, callback, ignoreTimeout, server) {
+	componentRequest("POST", componentName, params, contentDiv, fillContentDiv, callback, null, ignoreTimeout, server);
+}
+
+function px(num) {
+	return num.toString() + "px";
+}
+
+function redirect(url) {
+	document.location.href = url;
+}
+
+function redirectFade(url) {
+	setTimeout(function () { fade(false) }, 100);
+
+	document.location.href = url;
+}
+
+function reloadPage() {
+	location.reload(true);
+}
+
+function refreshAjax(elemID, params, delay, ignoreDiv, divID2) {
+	if (delay && delay > 0) {
+		setTimeout(function () { refreshAjax(elemID, params) }, delay);
+	} else {
+		var elem = element(elemID);
+
+		if (elem) {
+			var isDiv = (!ignoreDiv && elem.tagName.toLowerCase() === "div");
+
+			var p = elem;
+
+			while (p) {
+				var c = p.getAttribute("ajaxcomponent");
+
+				if (c) {
+					params = appendParams(params, "refreshAjax=1");
+					params = appendParams(params, "ajaxRequestID=" + p.getAttribute("ajaxrequestid"));
+
+					var div = p.parentElement;
+					while (!div.id) div = div.parentElement;
+
+					var s = p.getAttribute("ajaxserver");
+
+					if (isDiv) {
+						postComponent(c, params, div, false, function (result) {
+							elem.innerHTML = extractDivContents(result.data, elemID);
+
+							if (divID2) {
+								divID2 += p.getAttribute("ajaxrequestid");
+								var div2 = element(divID2);
+								if (div2) div2.innerHTML = extractDivContents(result.data, divID2);
+							}
+						}, false, s);
+					} else {
+						postComponent(c, params, div, true, null, false, s);
+					}
+
+					return;
+				}
+
+				p = p.parentElement;
+			}
+		}
+	}
+}
+
+function removeClass(e, className) {
+	var newClass = "";
+	var classes = element(e).className.split(" ");
+
+	for (var i = 0; i < classes.length; i++) {
+		if (classes[i] !== className) {
+			if (newClass.length > 0) newClass += " ";
+			newClass += classes[i];
+		}
+	}
+
+	element(e).className = newClass;
+}
+
+function removeScripts(html) {
+	var p = html.indexOf("<script");
+
+	while (p >= 0) {
+		var q = html.indexOf("</script>", p);
+
+		if (q > p) {
+			html = html.substr(0, p) + html.substr(q + 9);
+			p = html.indexOf("<script");
+		} else {
+			myAlert("Syntax error: missing closing script tag");
+			return "";
+		}
+	}
+
+	return html;
+}
+
+function scrollToBottom(id) {
+	var e = element(id);
+	if (e) e.scrollTop = e.scrollHeight;
+}
+
+function scrollToElement(scrollableElement, elem) {
+	var e = element(scrollableElement);
+	var e2 = element(elem);
+
+	if (e && e2) e.scrollTop = (e2.offsetTop - e.offsetTop) - 5;
+}
+
+function scrollWindowToTop() {
+	window.scrollTo(null, 0);
+}
+
+function selectSubItems(parentSelector) {
+	var sParent = element(parentSelector.id + "_select");
+
+	$(parentSelector).find(".selector").each(function () {
+		var s = element(this.id + "_select");
+		if (sParent.value !== s.value) this.click();
+	});
+}
+
+function setScrollPos(scrollableElement, pos) {
+	var e = element(scrollableElement);
+	if (e) e.scrollTop = pos;
+}
+
+function setInputFocus(contentDiv) {
+	contentDiv = element(contentDiv);
+
+	var inputs = contentDiv.getElementsByTagName("input");
+
+	for (i = 0; i < inputs.length; i++) {
+		if (inputs[i].id) {
+			if (inputs[i].getAttribute("autofocus") === "autofocus") {
+				inputs[i].focus();
+
+				return;
+			}
+		}
+	}
+
+	var tas = contentDiv.getElementsByTagName("textarea");
+	for (i = 0; i < tas.length; i++) {
+		if (tas[i].id) {
+			if (tas[i].getAttribute("autofocus") === "autofocus") {
+				tas[i].focus();
+
+				return;
+			}
+		}
+	}
+}
+
+function setSelector(e, notCss, css, selected, singleSelect) {
+	var h = element(e.id + "_select");
+
+	if (selected) {
+		h.value = "1";
+		if (css) e.className = css;
+	} else {
+		h.value = "0";
+		if (notCss) e.className = notCss;
+	}
+
+	if (singleSelect && selected) {
+		$(e.parentElement).find(".selector").each(function () {
+			if (this.id !== e.id) {
+				element(this.id + "_select").value = "0";
+				this.className = notCss;
+			}
+		});
+	}
+}
+
+function show(e, inline) {
+	var elem = element(e);
+
+	if (elem) {
+		if (inline)
+			elem.style.display = "inline-block";
+		else
+			elem.style.display = "block";
+	}
+}
+
+function showClicked(elem) {
+	elem = element(elem);
+
+	var op = $(elem).css("opacity");
+
+	$(elem).css("opacity", "0");
+
+	$(elem).animate({ "opacity": op }, 200);
+
+	//$(id).animate({ "opacity": "0.2" }, 75, function () {
+	//	$(id).animate({ "opacity": "1" }, 75);
+	//});
+}
+
+function toggleClass(e, class1, class2) {
+	var newClass = "";
+	var toggled = false;
+	var classes = element(e).className.split(" ");
+
+	for (var i = 0; i < classes.length; i++) {
+		var add = "";
+
+		if (classes[i] === class1) {
+			add = class2;
+			toggled = true;
+		} else if (classes[i] === class2) {
+			add = class1;
+			toggled = true;
+		} else {
+			add = classes[i];
+		}
+
+		if (add.length > 0) {
+			if (newClass.length > 0) newClass += " ";
+			newClass += add;
+		}
+	}
+
+	if (!toggled) {
+		if (newClass.length > 0) newClass += " ";
+		newClass += class2;
+	}
+
+	element(e).className = newClass;
+}
+
+function toggleHidden(e) {
+	var elem = element(e);
+
+	if (elem.style.display === "none") show(e); else hide(e);
+}
+
+function toggleSelector(e, notCss, css, singleSelect) {
+	var h = element(e.id + "_select");
+
+	if (h.value === "0") {
+		h.value = "1";
+		if (css) e.className = css;
+	} else {
+		h.value = "0";
+		if (notCss) e.className = notCss;
+	}
+
+	if (singleSelect) {
+		$(e.parentElement).find(".selector").each(function () {
+			if (this.id !== e.id) {
+				element(this.id + "_select").value = "0";
+				this.className = notCss;
+			}
+		});
+	}
+}

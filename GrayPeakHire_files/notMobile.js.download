@@ -1,0 +1,56 @@
+﻿function closeEdit(saved) {
+	docSaved = saved;
+	window.close();
+}
+
+function editDocument(docHash, saveOver) {
+	openDocument(docHash, true, null, saveOver);
+}
+
+function openDocument(docHash, edit, params, saveOver) {
+	var left = "";
+	var top = ""
+	var width = "";
+	var height = "";
+
+	var v = localStorage.getItem("docTop");
+	if (v && v.length > 0) {
+		var n = parseInt(v);
+		if (!isNaN(n) && n < $(window).height()) top = "top=" + v + ",";
+	}
+
+	v = localStorage.getItem("docLeft");
+	if (v && v.length > 0) {
+		var n = parseInt(v);
+		if (!isNaN(n) && n < $(window).width()) left = "left=" + v + ",";
+	}
+
+	v = localStorage.getItem("docWidth");
+	if (v && v.length > 0) width = "width=" + v + ",";
+
+	v = localStorage.getItem("docHeight");
+	if (v && v.length > 0) height = "height=" + v + ",";
+
+	if (edit && saveOver)
+		window.open("/editdoc/" + docHash + "/so", "editdoc_" + docHash, left + top + width + height + "menubar=0,toolbar=0,location=0,personalbar=0,status=0,titlebar=0,alwaysRaised=1,scrollbars=1");
+	else if (edit)
+		window.open("/editdoc/" + docHash, "editdoc_" + docHash, left + top + width + height + "menubar=0,toolbar=0,location=0,personalbar=0,status=0,titlebar=0,alwaysRaised=1,scrollbars=1");
+	else if (params)
+		window.open("/report/" + docHash + "/" + encodeURIComponent(params), "report_" + docHash, left + top + width + height + "menubar=0,toolbar=0,location=0,personalbar=0,status=0,titlebar=0,alwaysRaised=1,scrollbars=1");
+	else
+		window.open("/viewdoc/" + docHash, "viewdoc_" + docHash, left + top + width + height + "menubar=0,toolbar=0,location=0,personalbar=0,status=0,titlebar=0,alwaysRaised=1,scrollbars=1");
+}
+
+function setupSwipe() {
+	return;
+}
+
+function showDocument(docHash) {
+	openDocument(docHash, false);
+}
+
+function showReport(name, params) {
+	if (!params) params = "null";
+	openDocument(name, false, params);
+}
+

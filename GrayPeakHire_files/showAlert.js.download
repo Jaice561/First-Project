@@ -1,0 +1,10 @@
+﻿function showAlert(msg, callback) {
+	if (callback) {
+		Swal.fire({
+			text: msg,
+			onClose: callback
+		});
+	} else {
+		Swal.fire(msg);
+	}
+}
