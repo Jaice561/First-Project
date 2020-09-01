@@ -72,10 +72,36 @@
 
 </div>
 	<div id="componentstatusbar01_showModeSwitch" class="status_bar_other">
+		<div id="dashboardHelp" class="search_help">
+			<div style="margin-bottom:6px; text-align:left"><img src="./GrayPeakHire_files/closeB.svg" class="icon" onclick="showHelp(null, document.getElementById('dashboardHelp'))"></div>
+
+			<div style="font-weight:bold; margin-bottom:10px">dashboard Help</div>
+
+			<div style="margin-bottom:10px">click on this button to see the dashboard</div>
+
+			<div style="margin-bottom:10px">Search more broadly using names, email addresses &amp; phone numbers. Also, job names, numbers &amp; locations (city, state, zip code). Example: counselor FL smith</div>
+
+			<div style="margin-bottom:10px"><span style="font-weight:bold">To search for jobs,</span> include the word "job" as the first term. Example: job admin assistant</div>
+
+			<div>To search for exact matches on multi-word terms, use quotes. Example: "admin assistant"</div>
+		</div>
 		<div id="switchDashboard" class="mode_switch " onclick="animateIcon(this); switchAppMode(&#39;dashboard&#39;)">DASHBOARD</div>
-		<div style="padding-top:4px; display:inline-block"><img src="./GrayPeakHire_files/question.svg" class="icon" title="Global Search Help" onclick="showSearchHelp(this)"></div>
+		<div style="padding-top:4px; display:inline-block"><img src="./GrayPeakHire_files/question.svg" class="icon" title="Global Search Help" onclick="showHelp(this, document.getElementById('dashboardHelp'))"></div>
+		<div id="desktopHelp" class="search_help">
+			<div style="margin-bottom:6px; text-align:left"><img src="./GrayPeakHire_files/closeB.svg" class="icon" onclick="showHelp(null,  document.getElementById('desktopHelp'))"></div>
+
+			<div style="font-weight:bold; margin-bottom:10px">Desktop Help</div>
+
+			<div style="margin-bottom:10px">click on this button to see the Desktop</div>
+
+			<div style="margin-bottom:10px">Search more broadly using names, email addresses &amp; phone numbers. Also, job names, numbers &amp; locations (city, state, zip code). Example: counselor FL smith</div>
+
+			<div style="margin-bottom:10px"><span style="font-weight:bold">To search for jobs,</span> include the word "job" as the first term. Example: job admin assistant</div>
+
+			<div>To search for exact matches on multi-word terms, use quotes. Example: "admin assistant"</div>
+		</div>
 		<div id="switchDesktop" class="mode_switch selected" onclick="animateIcon(this); switchAppMode(&#39;desktop&#39;)">DESKTOP</div>
-		<div style="padding-top:4px; display:inline-block"><img src="./GrayPeakHire_files/question.svg" class="icon" title="Global Search Help" onclick="showSearchHelp(this)"></div>
+		<div style="padding-top:4px; display:inline-block"><img src="./GrayPeakHire_files/question.svg" class="icon" title="Global Search Help" onclick="showHelp(this, document.getElementById('desktopHelp'))"></div>
 	</div>
 </div>
 
@@ -127,10 +153,10 @@
 			
 			
 			<div id="module_header_29987C5B939A0D59E4BAFEC96843AE508DC3D8D5067344508BE901C28B348C72" class="module_header" onclick="slideToFrame(findModuleFrame(this))">
+		
 				<div style="min-height:61px">
 					<table>
 						<tbody><tr>
-							
 							
 							
 							<td style="width:36px; text-align:left; vertical-align:top">
@@ -142,7 +168,20 @@
 							
 							<td id="modulejobmanager01_header_td1" class="module_header_title dont_break">
 								Jobs
-								<div style="padding-top:4px; display:inline-block"><img src="./GrayPeakHire_files/question.svg" class="icon" title="Global Search Help" onclick="showSearchHelp(this)"></div>
+								<div id="jobHelp" class="search_help">
+									<div style="margin-bottom:6px; text-align:left"><img src="./GrayPeakHire_files/closeB.svg" class="icon" onclick="showHelp(null, document.getElementById('jobHelp'))"></div>
+						
+									<div style="font-weight:bold; margin-bottom:10px">Jobs Help</div>
+						
+									<div style="margin-bottom:10px">click on this button to see the dashboard</div>
+						
+									<div style="margin-bottom:10px">Search more broadly using names, email addresses &amp; phone numbers. Also, job names, numbers &amp; locations (city, state, zip code). Example: counselor FL smith</div>
+						
+									<div style="margin-bottom:10px"><span style="font-weight:bold">To search for jobs,</span> include the word "job" as the first term. Example: job admin assistant</div>
+						
+									<div>To search for exact matches on multi-word terms, use quotes. Example: "admin assistant"</div>
+								</div>
+								<div style="padding-top:4px; display:inline-block"><img src="./GrayPeakHire_files/question.svg" class="icon" title="Global Search Help" onclick="showHelp(this,  document.getElementById('jobHelp'))"></div>
 							</td>
 
 
@@ -2428,7 +2467,20 @@
 
 				<td id="modulejobdetail01_header_td1" class="module_header_title dont_break">
 					TR.4045
-					<div style="padding-top:4px; display:inline-block"><img src="./GrayPeakHire_files/question.svg" class="icon" title="Global Search Help" onclick="showSearchHelp(this)"></div>
+					<div id="trHelp" class="search_help">
+						<div style="margin-bottom:6px; text-align:left"><img src="./GrayPeakHire_files/closeB.svg" class="icon" onclick="showHelp(null, document.getElementById('trHelp'))"></div>
+			
+						<div style="font-weight:bold; margin-bottom:10px">TR.4045 Help</div>
+			
+						<div style="margin-bottom:10px">click on this button to see the dashboard</div>
+			
+						<div style="margin-bottom:10px">Search more broadly using names, email addresses &amp; phone numbers. Also, job names, numbers &amp; locations (city, state, zip code). Example: counselor FL smith</div>
+			
+						<div style="margin-bottom:10px"><span style="font-weight:bold">To search for jobs,</span> include the word "job" as the first term. Example: job admin assistant</div>
+			
+						<div>To search for exact matches on multi-word terms, use quotes. Example: "admin assistant"</div>
+					</div>
+					<div style="padding-top:4px; display:inline-block"><img src="./GrayPeakHire_files/question.svg" class="icon" title="Global Search Help" onclick="showHelp(this, document.getElementById('trHelp'))"></div>
 
 				</td>
 
@@ -2670,7 +2722,20 @@
 
 				<td id="moduleapplicant01_header_td1" class="module_header_title dont_break">
 					Kopcho, Lisa
-					<div style="padding-top:4px; display:inline-block"><img src="./GrayPeakHire_files/question.svg" class="icon" title="Global Search Help" onclick="showSearchHelp(this)"></div>
+					<div id="kopchoHelp" class="search_help">
+						<div style="margin-bottom:6px; text-align:left"><img src="./GrayPeakHire_files/closeB.svg" class="icon" onclick="showHelp(null, document.getElementById('kopchoHelp'))"></div>
+			
+						<div style="font-weight:bold; margin-bottom:10px">Kopcho Help</div>
+			
+						<div style="margin-bottom:10px">click on this button to see the dashboard</div>
+			
+						<div style="margin-bottom:10px">Search more broadly using names, email addresses &amp; phone numbers. Also, job names, numbers &amp; locations (city, state, zip code). Example: counselor FL smith</div>
+			
+						<div style="margin-bottom:10px"><span style="font-weight:bold">To search for jobs,</span> include the word "job" as the first term. Example: job admin assistant</div>
+			
+						<div>To search for exact matches on multi-word terms, use quotes. Example: "admin assistant"</div>
+					</div>
+					<div style="padding-top:4px; display:inline-block"><img src="./GrayPeakHire_files/question.svg" class="icon" title="Global Search Help" onclick="showHelp(this, document.getElementById('kopchoHelp'))"></div>
 
 				</td>
 
@@ -3073,7 +3138,20 @@
 
 				<td id="modulejobedit_header_td1" class="module_header_title dont_break">
 					TR.4045
-					<div style="padding-top:4px; display:inline-block"><img src="./GrayPeakHire_files/question.svg" class="icon" title="Global Search Help" onclick="showSearchHelp(this)"></div>
+					<div id="tr.Help" class="search_help">
+						<div style="margin-bottom:6px; text-align:left"><img src="./GrayPeakHire_files/closeB.svg" class="icon" onclick="showHelp(null, document.getElementById('tr.Help'))"></div>
+			
+						<div style="font-weight:bold; margin-bottom:10px">TR.4045#2 Help</div>
+			
+						<div style="margin-bottom:10px">click on this button to see the dashboard</div>
+			
+						<div style="margin-bottom:10px">Search more broadly using names, email addresses &amp; phone numbers. Also, job names, numbers &amp; locations (city, state, zip code). Example: counselor FL smith</div>
+			
+						<div style="margin-bottom:10px"><span style="font-weight:bold">To search for jobs,</span> include the word "job" as the first term. Example: job admin assistant</div>
+			
+						<div>To search for exact matches on multi-word terms, use quotes. Example: "admin assistant"</div>
+					</div>
+					<div style="padding-top:4px; display:inline-block"><img src="./GrayPeakHire_files/question.svg" class="icon" title="Global Search Help" onclick="showHelp(this,  document.getElementById('tr.Help'))"></div>
 
 				</td>
 
