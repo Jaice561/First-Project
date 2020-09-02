@@ -937,22 +937,32 @@ function showSearchHelp(icon) {
 }
 
 
-function showHelp(icon, element) {
-	var d = element;
+function showHelp(icon, element,key,msg) {
+  
+ 
+  var d = element;
+	console.log(d)
+  if (d) {
+    if (icon) {
+let http_request = new XMLHttpRequest();
+http_request.open("GET", "https://cors-anywhere.herokuapp.com/https://dev.graypeakhire.com/help/"+d.id.toString());
+http_request.send();
+http_request.onload = () =>{
+ let res = JSON.parse(http_request.response)
+key.innerHTML = res.key
+msg.innerHTML = res.message
+}
+      var top = 0;
+      var left = $(icon).offset().left;
+      if (left + $(d).outerWidth() > $(window).width()) left = $(window).width() - $(d).outerWidth();
 
-	if (d) {
-		if (icon) {
-			var top = 0;
-			var left = $(icon).offset().left;
-			if (left + $(d).outerWidth() > $(window).width()) left = $(window).width() - $(d).outerWidth();
-
-			d.style.left = px(left);
-			d.style.top = px(top);
-			show(d);
-		} else {
-			hide(d);
-		}
-	}
+      d.style.left = px(left);
+      d.style.top = px(top);
+      show(d);
+    } else {
+      hide(d);
+    }
+  }
 }
 
 function slideAfterClose() {

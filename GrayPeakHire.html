@@ -73,20 +73,27 @@
 </div>
 	<div id="componentstatusbar01_showModeSwitch" class="status_bar_other">
 		<div id="dashboardHelp" class="search_help">
-			<div style="margin-bottom:6px; text-align:left"><img src="./GrayPeakHire_files/closeB.svg" class="icon" onclick="showHelp(null, document.getElementById('dashboardHelp'))"></div>
+			<div style="margin-bottom:6px; text-align:left"><img src="./GrayPeakHire_files/closeB.svg" class="icon" 
+			onclick="showHelp(null,
+			document.getElementById('dashboardHelp'),
+			document.getElementById('dashboard-key'),
+			document.getElementById('dashboard-message'),
+			)"></div>
+	  
+			<div id="dashboard-key" style="font-weight:bold; margin-bottom:10px"></div>
+	  
+			<div id="dashboard-message" style="margin-bottom:10px"></div>
+	  
+			</div>
+	  
+			<div id="switchDashboard" class="mode_switch " onclick="animateIcon(this); switchAppMode(&#39;dashboard&#39;)">DASHBOARD</div>
+		  <div style="padding-top:4px; display:inline-block"><img src="./GrayPeakHire_files/question.svg" class="icon" title="Global Search Help" 
+		  onclick="showHelp(this, 
+		  document.getElementById('dashboardHelp'),
+		  document.getElementById('dashboard-key'),
+			document.getElementById('dashboard-message'),
+		  )"></div>
 
-			<div style="font-weight:bold; margin-bottom:10px">dashboard Help</div>
-
-			<div style="margin-bottom:10px">click on this button to see the dashboard</div>
-
-			<div style="margin-bottom:10px">Search more broadly using names, email addresses &amp; phone numbers. Also, job names, numbers &amp; locations (city, state, zip code). Example: counselor FL smith</div>
-
-			<div style="margin-bottom:10px"><span style="font-weight:bold">To search for jobs,</span> include the word "job" as the first term. Example: job admin assistant</div>
-
-			<div>To search for exact matches on multi-word terms, use quotes. Example: "admin assistant"</div>
-		</div>
-		<div id="switchDashboard" class="mode_switch " onclick="animateIcon(this); switchAppMode(&#39;dashboard&#39;)">DASHBOARD</div>
-		<div style="padding-top:4px; display:inline-block"><img src="./GrayPeakHire_files/question.svg" class="icon" title="Global Search Help" onclick="showHelp(this, document.getElementById('dashboardHelp'))"></div>
 		<div id="desktopHelp" class="search_help">
 			<div style="margin-bottom:6px; text-align:left"><img src="./GrayPeakHire_files/closeB.svg" class="icon" onclick="showHelp(null,  document.getElementById('desktopHelp'))"></div>
 
