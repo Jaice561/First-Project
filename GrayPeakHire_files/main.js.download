@@ -923,6 +923,7 @@ function showSearchHelp(icon) {
 
 	if (d) {
 		if (icon) {
+			helpMode(true)
 			var top = 0;
 			var left = $(icon).offset().left;
 			if (left + $(d).outerWidth() > $(window).width()) left = $(window).width() - $(d).outerWidth();
@@ -932,37 +933,106 @@ function showSearchHelp(icon) {
 			show(d);
 		} else {
 			hide(d);
+			helpMode(false)
 		}
 	}
 }
 
 
-function showHelp(icon, element,key,msg) {
-  
- 
-  var d = element;
-	console.log(d)
-  if (d) {
-    if (icon) {
-let http_request = new XMLHttpRequest();
-http_request.open("GET", "https://cors-anywhere.herokuapp.com/https://dev.graypeakhire.com/help/"+d.id.toString());
-http_request.send();
-http_request.onload = () =>{
- let res = JSON.parse(http_request.response)
-key.innerHTML = res.key
-msg.innerHTML = res.message
-}
-      var top = 0;
-      var left = $(icon).offset().left;
-      if (left + $(d).outerWidth() > $(window).width()) left = $(window).width() - $(d).outerWidth();
+function helpMode(show){
+      //create divs
+var elements = document.querySelectorAll('[help]')
+      elements.forEach(element => {
 
-      d.style.left = px(left);
-      d.style.top = px(top);
-      show(d);
-    } else {
+         if(show) {
+            if (!document.getElementById(element.getAttribute('help') + '-q')) {
+               var parentDiv = document.createElement('div');
+               parentDiv.id = element.getAttribute('help') + '-q'
+               parentDiv.style.backgroundColor = 'royalblue'
+               parentDiv.style.borderRadius = '70px'
+               parentDiv.style.display = 'inline-block'
+                    parentDiv.style.position='absolute'
+                    parentDiv.style.margin= '6px 0px 0px -65px'
+               var helpImg = document.createElement('img')
+               helpImg.src = './GrayPeakHire_files/question.svg'
+               helpImg.className = 'icon'
+               helpImg.title = element.getAttribute('help')
+               helpImg.addEventListener("click", function () {
+                  showHelp(this, element, true)
+               })
+               parentDiv.appendChild(helpImg)
+               element.parentNode.insertBefore(parentDiv, element.nextSibling)
+            }
+            else if(document.getElementById(element.getAttribute('help') + '-q').style.visibility=='hidden'){
+               document.getElementById(element.getAttribute('help') + '-q').style.visibility='visible';
+            }
+         }
+         else{
+            document.getElementById(element.getAttribute('help') + '-q').style.visibility='hidden';
+         }
+      })
+   }
+
+
+
+function showHelp(icon,element,flag) {
+   var d=document.getElementById(icon.title);
+   if(flag) {
+      if (d === null) {
+         var parentDiv = document.createElement('div');
+         parentDiv.id = icon.title
+         parentDiv.className = 'search_help'
+         var childDiv = document.createElement('div');
+         childDiv.style.textAlign = 'left'
+         childDiv.style.marginBottom = '6px'
+         parentDiv.appendChild(childDiv)
+         var helpImg = document.createElement('img')
+         helpImg.src = './GrayPeakHire_files/closeB.svg'
+         helpImg.className = 'icon'
+         helpImg.title = element.getAttribute('help')
+         helpImg.addEventListener("click", function () {
+            showHelp(this, element, false)
+         })
+         childDiv.appendChild(helpImg)
+         element.parentNode.insertBefore(parentDiv, element.nextSibling)
+         d=parentDiv
+      }
+      let http_request = new XMLHttpRequest();
+      http_request.open("GET", "https://cors-anywhere.herokuapp.com/https://dev.graypeakhire.com/help/" + icon.title.toString());
+      http_request.send();
+      http_request.onload = () => {
+         let res = JSON.parse(http_request.response)
+
+         let key = icon.title.toString() + '-key'
+         let msg = icon.title.toString() + '-message'
+         if (document.getElementById(key) === null) {
+            var keyDiv = document.createElement('div');
+            keyDiv.id = key
+            keyDiv.innerHTML = res.key
+            keyDiv.style.marginBottom = '10px'
+            keyDiv.style.fontWeight = 'bold'
+            d.appendChild(keyDiv);
+         }
+         if (document.getElementById(msg) === null) {
+            var msgDiv = document.createElement('div');
+            msgDiv.id = msg
+            msgDiv.innerHTML = res.message
+            msgDiv.style.marginBottom = '10px'
+            d.appendChild(msgDiv)
+         }
+
+         var top = 0;
+         var left = $(icon).offset().left;
+         if (left + $(d).outerWidth() > $(window).width()) left = $(window).width() - $(d).outerWidth();
+
+         d.style.left = px(left);
+         d.style.top = px(top);
+         show(d);
+      }
+   }
+    else {
       hide(d);
     }
-  }
 }
 
 function slideAfterClose() {

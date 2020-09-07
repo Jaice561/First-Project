@@ -72,49 +72,9 @@
 
 </div>
 	<div id="componentstatusbar01_showModeSwitch" class="status_bar_other">
-		<div id="dashboardHelp" class="search_help">
-			<div style="margin-bottom:6px; text-align:left"><img src="./GrayPeakHire_files/closeB.svg" class="icon" 
-			onclick="showHelp(null,
-			document.getElementById('dashboardHelp'),
-			document.getElementById('dashboard-key'),
-			document.getElementById('dashboard-message'),
-			)"></div>
-	  
-			<div id="dashboard-key" style="font-weight:bold; margin-bottom:10px"></div>
-	  
-			<div id="dashboard-message" style="margin-bottom:10px"></div>
-	  
-			</div>
-	  
-			<div id="switchDashboard" class="mode_switch " onclick="animateIcon(this); switchAppMode(&#39;dashboard&#39;)">DASHBOARD</div>
-		  <div style="background-color: royalblue; border-radius: 70px;display:inline-block"><img src="./GrayPeakHire_files/question.svg" class="icon" title="Dashboard Help" 
-		  onclick="showHelp(this, 
-		  document.getElementById('dashboardHelp'),
-		  document.getElementById('dashboard-key'),
-			document.getElementById('dashboard-message'),
-		  )"></div>
+		<div id="switchDashboard" class="mode_switch " help="dashboard-help" onclick="animateIcon(this); switchAppMode(&#39;dashboard&#39;)">DASHBOARD</div>
 
-<div id="desktopHelp" class="search_help">
-	<div style="margin-bottom:6px; text-align:left"><img src="./GrayPeakHire_files/closeB.svg" class="icon" 
-	onclick="showHelp(null,
-	document.getElementById('desktopHelp'),
-	document.getElementById('desktop-key'),
-	document.getElementById('desktop-message'),
-	)"></div>
-
-	<div id="desktop-key" style="font-weight:bold; margin-bottom:10px"></div>
-
-	<div id="desktop-message" style="margin-bottom:10px"></div>
-
-	</div>
-
-	<div id="switchDesktop" class="mode_switch " onclick="animateIcon(this); switchAppMode(&#39;dashboard&#39;)">DESKTOP</div>
-  <div style=" background-color: royalblue; border-radius: 70px; display:inline-block"><img src="./GrayPeakHire_files/question.svg" class="icon" title="Desktop Help" 
-  onclick="showHelp(this, 
-  document.getElementById('desktopHelp'),
-  document.getElementById('desktop-key'),
-	document.getElementById('desktop-message'),
-  )"></div>
+		<div id="switchDesktop" class="mode_switch " help="desktop-help" onclick="animateIcon(this); switchAppMode(&#39;dashboard&#39;)">DESKTOP</div>
 	</div>
 </div>
 
